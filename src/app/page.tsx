@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 
 export default function Home() {
   let socket: WebSocket | null = null;
+  const [progress, setProgress] = useState(['Setting up..']);
   useEffect(() => {
     socket = new WebSocket("ws://localhost:3000/api/websocket");
     socket.onopen = () => {
@@ -12,6 +13,7 @@ export default function Home() {
     };
     socket.onmessage = (event) => {
       console.log("Received message: ", event.data);
+      setProgress((prev) => [...prev, event.data]);
     };
     socket.onclose = () => {
       console.log("Disconnected from server");
@@ -35,7 +37,7 @@ export default function Home() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ githubUrl: githubUrl, entry: entry}),
+      body: JSON.stringify({ githubUrl: githubUrl, entry: entry }),
     })
       .catch((error) => {
         notify("Error submitting form");
@@ -90,6 +92,14 @@ export default function Home() {
           >
             Submit
           </button>
+        </div>
+        <div className="flex items-center justify-between">
+          <a>Status: </a>
+          <ul>
+            {progress.map((msg, i) => (
+              <li key={i}>{msg}</li>
+            ))}
+          </ul>
         </div>
       </form>
     </main>
